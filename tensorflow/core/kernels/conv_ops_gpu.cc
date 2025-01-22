@@ -46,7 +46,7 @@ bool ComputeInNhwcEnabled(DataType data_type, se::Stream* stream,
                        tensorflow::tensor_float_32_execution_enabled();
   bool use_nhwc_fp16 =
       data_type == DT_HALF && stream->GetCudaComputeCapability().IsAtLeast(
-                                  se::CudaComputeCapability::VOLTA);
+                                  se::CudaComputeCapability::kVolta);
   bool use_nhwc_bf16 =
       data_type == DT_BFLOAT16 && stream->GetCudaComputeCapability().IsAtLeast(
                                       se::CudaComputeCapability::AMPERE);

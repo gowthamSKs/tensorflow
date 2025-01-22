@@ -19,10 +19,10 @@ limitations under the License.
 #include <cassert>
 #include <string>
 #include <utility>
-#include <vector>
 
+#include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
-#include "absl/strings/str_split.h"
+#include "absl/strings/string_view.h"
 #include "xla/stream_executor/cuda/cuda_compute_capability.pb.h"
 
 namespace stream_executor {
@@ -34,11 +34,11 @@ struct CudaComputeCapability {
 
   // MSVC does not like "PASCAL" symbol.
   enum CudaComputeCapabilities {
-    PASCAL_ = 6,
-    VOLTA = 7,
-    AMPERE = 8,
-    HOPPER = 9,
-    BLACKWELL = 10
+    kPascal = 6,
+    kVolta = 7,
+    kAmpere = 8,
+    kHopper = 9,
+    kBlackwell = 10
   };
 
   constexpr CudaComputeCapability() = default;
@@ -46,13 +46,10 @@ struct CudaComputeCapability {
     this->major = major;
     this->minor = minor;
   }
-  // cuda arch format "major.minor", example: "8.6".
-  explicit CudaComputeCapability(const std::string &cuda_arch_name) {
-    std::vector<std::string> split = absl::StrSplit(cuda_arch_name, '.');
-    assert(split.size() == 2);
-    this->major = std::stoi(split[0]);
-    this->minor = std::stoi(split[1]);
-  }
+
+  // Parses the architecture name in the format "major.minor", example: "8.6".
+  static absl::StatusOr<CudaComputeCapability> FromString(
+      absl::string_view cuda_arch_name);
 
   explicit CudaComputeCapability(const CudaComputeCapabilityProto &proto) {
     this->major = proto.major();
@@ -60,19 +57,19 @@ struct CudaComputeCapability {
   }
 
   static CudaComputeCapability Volta() {
-    return CudaComputeCapability{VOLTA, 0};
+    return CudaComputeCapability{kVolta, 0};
   }
 
   static CudaComputeCapability Ampere() {
-    return CudaComputeCapability{AMPERE, 0};
+    return CudaComputeCapability{kAmpere, 0};
   }
 
   static CudaComputeCapability Hopper() {
-    return CudaComputeCapability{HOPPER, 0};
+    return CudaComputeCapability{kHopper, 0};
   }
 
   static CudaComputeCapability Blackwell() {
-    return CudaComputeCapability{BLACKWELL, 0};
+    return CudaComputeCapability{kBlackwell, 0};
   }
 
   bool IsAtLeast(int other_major, int other_minor = 0) const {
@@ -84,19 +81,19 @@ struct CudaComputeCapability {
   }
 
   bool IsAtLeastVolta() const {
-    return major >= CudaComputeCapabilities::VOLTA;
+    return major >= CudaComputeCapabilities::kVolta;
   }
 
   bool IsAtLeastAmpere() const {
-    return major >= CudaComputeCapabilities::AMPERE;
+    return major >= CudaComputeCapabilities::kAmpere;
   }
 
   bool IsAtLeastHopper() const {
-    return major >= CudaComputeCapabilities::HOPPER;
+    return major >= CudaComputeCapabilities::kHopper;
   }
 
   bool IsAtLeastBlackwell() const {
-    return major >= CudaComputeCapabilities::BLACKWELL;
+    return major >= CudaComputeCapabilities::kBlackwell;
   }
 
   bool operator<(const CudaComputeCapability &other) const {

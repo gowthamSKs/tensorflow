@@ -91,6 +91,8 @@ limitations under the License.
 #include "xla/util.h"
 #include "xla/xla_data.pb.h"
 #include "tsl/platform/casts.h"
+#include "tsl/profiler/lib/traceme.h"
+#include "tsl/profiler/lib/traceme_encode.h"
 
 namespace xla::cpu {
 
@@ -116,6 +118,10 @@ absl::StatusOr<ThunkSequence> ThunkEmitter::EmitEntryComputation(
   if (!module.has_schedule()) {
     return absl::InternalError("HLO module must be scheduled to emit thunks");
   }
+  tsl::profiler::TraceMe trace([] {
+    return tsl::profiler::TraceMeEncode("ThunkEmitter::EmitEntryComputation",
+                                        {});
+  });
   return EmitHloComputation(module.entry_computation());
 }
 

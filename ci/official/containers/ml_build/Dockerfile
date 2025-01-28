@@ -12,6 +12,18 @@ COPY builder.packages.txt /builder.packages.txt
 
 RUN /setup.sources.sh && /setup.packages.sh /builder.packages.txt
 
+COPY cudnn.packages.txt /cudnn.packages.txt
+ARG INSTALL_CUDNN=false
+
+RUN if [ "${INSTALL_CUDNN}" = "true" ]; then \
+      echo "Installing cudnn"; \
+      /setup.packages.sh /cudnn.packages.txt \
+    else \
+      echo "cudnn is not installed"; \
+    fi
+
+RUN /setup.packages.sh /cudnn.packages.txt
+
 # Install devtoolset-9 in /dt9 with glibc 2.17 and libstdc++ 4.8, for building
 # manylinux2014-compatible packages.
 COPY builder.devtoolset/fixlinks.sh /fixlinks.sh
